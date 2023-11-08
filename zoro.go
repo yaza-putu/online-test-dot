@@ -6,9 +6,9 @@ import (
 	"github.com/yaza-putu/online-test-dot/src/database"
 	_ "github.com/yaza-putu/online-test-dot/src/database/migrations"
 	_ "github.com/yaza-putu/online-test-dot/src/database/seeders"
+	"github.com/yaza-putu/online-test-dot/src/logger"
 	"github.com/yaza-putu/online-test-dot/src/utils"
 	"io"
-	"log"
 	"os"
 	"time"
 )
@@ -93,23 +93,19 @@ func (z *zoroCommand) newMigration() bool {
 
 	// from template
 	from, err := os.Open("./src/database/migration.stub")
-	if err != nil {
-		log.Fatal(err)
-	}
+	logger.New(err, logger.SetType(logger.FATAL))
+
 	defer from.Close()
 
 	// to file
 	to, err := os.OpenFile(fName, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
+	logger.New(err, logger.SetType(logger.FATAL))
 
 	defer to.Close()
 	// copy file with template
 	_, err = io.Copy(to, from)
-	if err != nil {
-		log.Fatal(err)
-	}
+	logger.New(err, logger.SetType(logger.FATAL))
+
 	fmt.Printf("New migration : %s\n", fName)
 
 	return true
@@ -118,7 +114,7 @@ func (z *zoroCommand) newMigration() bool {
 func (z *zoroCommand) upMigration() bool {
 	err := database.MigrationUp()
 	if err != nil {
-		log.Fatal(err)
+		logger.New(err, logger.SetType(logger.FATAL))
 		return false
 	} else {
 		fmt.Println("Migrating collections successfully")
@@ -129,7 +125,7 @@ func (z *zoroCommand) upMigration() bool {
 func (z *zoroCommand) downMigration() bool {
 	err := database.MigrationDown()
 	if err != nil {
-		log.Fatal(err)
+		logger.New(err, logger.SetType(logger.FATAL))
 		return false
 	} else {
 		fmt.Println("Drop collections successfully")
@@ -141,7 +137,7 @@ func (z *zoroCommand) upSeeder() bool {
 	err := database.SeederUp()
 
 	if err != nil {
-		log.Fatal(err)
+		logger.New(err, logger.SetType(logger.FATAL))
 		return false
 	} else {
 		fmt.Println("Run seeders successfully")
@@ -160,23 +156,18 @@ func (z *zoroCommand) newSeeder() bool {
 
 	// from template
 	from, err := os.Open("./src/database/seeder.stub")
-	if err != nil {
-		log.Fatal(err)
-	}
+	logger.New(err, logger.SetType(logger.FATAL))
 	defer from.Close()
 
 	// to file
 	to, err := os.OpenFile(fName, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
+	logger.New(err, logger.SetType(logger.FATAL))
 
 	defer to.Close()
 	// copy file with template
 	_, err = io.Copy(to, from)
-	if err != nil {
-		log.Fatal(err)
-	}
+	logger.New(err, logger.SetType(logger.FATAL))
+
 	fmt.Printf("New seeder : %s\n", fName)
 
 	return true

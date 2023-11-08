@@ -13,8 +13,8 @@ const (
 	WARN
 	ERROR
 	OFF
-	panicLevel
-	fatalLevel
+	PANIC
+	FATAL
 )
 
 type (
@@ -66,8 +66,10 @@ func getlabel(l Lvl) string {
 		return "INFO"
 	case DEBUG:
 		return "DEBUG"
-	case panicLevel:
+	case FATAL:
 		return "FATAL"
+	case PANIC:
+		return "PANIC"
 	default:
 		return "ERROR"
 	}
@@ -94,8 +96,11 @@ func writeError(err error, l Lvl) {
 	case DEBUG:
 		log.Debug(err.Error())
 		break
-	case panicLevel:
+	case FATAL:
 		log.Fatal(err.Error())
+		break
+	case PANIC:
+		log.Panic(err.Error())
 		break
 	default:
 		log.Error(err.Error())

@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/golang-jwt/jwt"
-	"github.com/labstack/gommon/log"
 	"github.com/yaza-putu/online-test-dot/src/app/auth/entity"
 	"github.com/yaza-putu/online-test-dot/src/config"
+	"github.com/yaza-putu/online-test-dot/src/logger"
 	"strings"
 	"time"
 )
@@ -92,6 +92,10 @@ func (t *tokenService) Refresh(ctx context.Context, rToken string) (string, erro
 	rc := make(chan ResponseChannel)
 
 	go func() {
+		if !strings.Contains(rToken, ".") {
+			rc <- ResponseChannel{Token: "", Refresh: "", Error: errors.New("token invalid")}
+		}
+
 		// token string to slice
 		sToken := strings.Split(rToken, ".")
 		if len(sToken) != 3 {
@@ -103,7 +107,7 @@ func (t *tokenService) Refresh(ctx context.Context, rToken string) (string, erro
 		var decodedString = string(decodedByte)
 		var claims = jwt.MapClaims{}
 		if err := json.Unmarshal([]byte(decodedString), &claims); err != nil {
-			log.Error(err)
+			logger.New(err, logger.SetType(logger.ERROR))
 		}
 		// claim data from refresh token
 		var tx, err = jwt.ParseWithClaims(rToken, claims, func(token *jwt.Token) (interface{}, error) {

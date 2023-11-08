@@ -1,6 +1,7 @@
 package request
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/id"
@@ -12,6 +13,7 @@ import (
 	"github.com/yaza-putu/online-test-dot/src/config"
 	"github.com/yaza-putu/online-test-dot/src/database"
 	"github.com/yaza-putu/online-test-dot/src/http/response"
+	"github.com/yaza-putu/online-test-dot/src/logger"
 	"strings"
 )
 
@@ -47,7 +49,7 @@ func Validation(s any, opts ...optFunc) (response.DataApi, error) {
 	trans, found := uni.GetTranslator(config.App().Lang)
 
 	if !found {
-		log.Fatal("translator not found")
+		logger.New(errors.New("translator not found"), logger.SetType(logger.FATAL))
 	}
 
 	v := validator.New()
@@ -66,7 +68,7 @@ func Validation(s any, opts ...optFunc) (response.DataApi, error) {
 		break
 	default:
 		if err := transalation_en.RegisterDefaultTranslations(v, trans); err != nil {
-			log.Fatal(err)
+			logger.New(err, logger.SetType(logger.FATAL))
 			return response.Api(response.SetStatus(false), response.SetMessage(err)), err
 		}
 		_ = v.RegisterTranslation("unique", trans, func(ut ut.Translator) error {

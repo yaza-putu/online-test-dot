@@ -44,3 +44,26 @@ func (a *authHandler) Create(ctx echo.Context) error {
 
 	return ctx.JSON(r.Code, r)
 }
+
+func (a *authHandler) Refresh(ctx echo.Context) error {
+	// request
+	req := validation.RefreshTokenValidation{}
+	b := ctx.Bind(&req)
+	if b != nil {
+		return ctx.JSON(http.StatusBadRequest, response.Api(
+			response.SetCode(400), response.SetMessage(fmt.Sprint("Bad request : %s", b.Error())),
+		))
+	}
+
+	// validation form
+	res, err := request.Validation(&req)
+	logger.New(err, logger.SetType(logger.INFO))
+
+	if err != nil {
+		return ctx.JSON(http.StatusUnprocessableEntity, res)
+	}
+
+	r := a.authService.Refresh(ctx.Request().Context(), req.Token)
+
+	return ctx.JSON(r.Code, r)
+}
