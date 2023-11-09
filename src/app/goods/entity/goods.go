@@ -14,3 +14,5 @@ type Goods struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
+
+type AllGoods []Goods
