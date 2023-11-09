@@ -73,8 +73,17 @@ func (c *goodsRepository) Delete(ctx context.Context, id string) error {
 func (c *goodsRepository) FindById(ctx context.Context, id string) (entity.Goods, error) {
 	e := c.entity
 	r := database.Instance.WithContext(ctx).Preload("Category").Where("id = ?", id).First(&e)
-
 	return e, r.Error
+}
+
+func (c *goodsRepository) Stock(ctx context.Context, id string, n int) error {
+	e := c.entity
+
+	d := database.Instance.WithContext(ctx).Where("id = ?", id).First(&e)
+	logger.New(d.Error, logger.SetType(logger.ERROR))
+
+	r := database.Instance.WithContext(ctx).Preload("Category").Model(&entity.Goods{}).Where("id = ?", id).Update("stock", e.Stock+n)
+	return r.Error
 }
 
 func (c *goodsRepository) All(ctx context.Context, page int, take int) (utils.Pagination, error) {

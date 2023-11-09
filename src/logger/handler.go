@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"github.com/labstack/gommon/log"
+	"github.com/yaza-putu/online-test-dot/src/config"
 	"os"
 	"path/filepath"
 )
@@ -53,10 +54,12 @@ func New(err error, opts ...optFunc) {
 	}
 
 	if err != nil {
-		if o.Write == true {
+		if o.Write == true && config.App().Status != "test" {
 			writeError(err, o.Type)
 		}
-		fmt.Printf("%s : %s", getlabel(o.Type), err.Error())
+		if config.App().Debug == true {
+			fmt.Printf("%s : %s", getlabel(o.Type), err.Error())
+		}
 	}
 }
 

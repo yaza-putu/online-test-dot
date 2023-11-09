@@ -110,6 +110,31 @@ func (c *goodsService) Update(ctx context.Context, id string, gds validation.Goo
 	}
 }
 
+func (c *goodsService) Stock(ctx context.Context, id string, n int) response.DataApi {
+	rc := make(chan response.DataApi)
+
+	go func() {
+		err := c.repository.Stock(ctx, id, n)
+		defer close(rc)
+
+		if err != nil {
+			logger.New(err, logger.SetType(logger.ERROR))
+			rc <- response.Api(response.SetCode(500), response.SetMessage(err))
+		}
+
+		rc <- response.Api(response.SetCode(200), response.SetMessage("Update Stock successfully"))
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return response.TimeOut()
+		case res := <-rc:
+			return res
+		}
+	}
+}
+
 func (c *goodsService) Delete(ctx context.Context, id string) response.DataApi {
 	rc := make(chan response.DataApi)
 	go func() {
@@ -143,7 +168,7 @@ func (c *goodsService) FindById(ctx context.Context, id string) response.DataApi
 
 		if err != nil {
 			logger.New(err, logger.SetType(logger.ERROR))
-			rc <- response.Api(response.SetCode(500), response.SetMessage(err))
+			rc <- response.Api(response.SetCode(404), response.SetMessage(err))
 		}
 
 		rc <- response.Api(response.SetCode(200), response.SetData(r))

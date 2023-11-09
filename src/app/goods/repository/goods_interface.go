@@ -12,4 +12,5 @@ type GoodsInterface interface {
 	Update(ctx context.Context, id string, user entity.Goods) error
 	Delete(ctx context.Context, id string) error
 	FindById(ctx context.Context, id string) (entity.Goods, error)
+	Stock(ctx context.Context, id string, n int) error
 }

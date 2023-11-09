@@ -96,14 +96,17 @@ func (t *tokenService) Refresh(ctx context.Context, rToken string) (string, erro
 			rc <- ResponseChannel{Token: "", Refresh: "", Error: errors.New("token invalid")}
 		}
 
+		defer close(rc)
+
 		// token string to slice
 		sToken := strings.Split(rToken, ".")
 		if len(sToken) != 3 {
 			rc <- ResponseChannel{Token: "", Refresh: "", Error: errors.New("token invalid")}
 		}
-
 		// decode base64 from token
-		var decodedByte, _ = base64.StdEncoding.DecodeString(sToken[1])
+		var decodedByte, errDecode = base64.StdEncoding.DecodeString(sToken[1])
+		logger.New(errDecode, logger.SetType(logger.ERROR))
+
 		var decodedString = string(decodedByte)
 		var claims = jwt.MapClaims{}
 		if err := json.Unmarshal([]byte(decodedString), &claims); err != nil {
@@ -132,7 +135,6 @@ func (t *tokenService) Refresh(ctx context.Context, rToken string) (string, erro
 		if err != nil {
 			rc <- ResponseChannel{Token: "", Refresh: "", Error: err}
 		}
-
 		rc <- ResponseChannel{Token: nToken, Refresh: "", Error: nil}
 	}()
 

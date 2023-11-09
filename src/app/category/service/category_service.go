@@ -142,9 +142,8 @@ func (c *categoryService) FindById(ctx context.Context, id string) response.Data
 
 		if err != nil {
 			logger.New(err, logger.SetType(logger.ERROR))
-			rc <- response.Api(response.SetCode(500), response.SetMessage(err))
+			rc <- response.Api(response.SetCode(404), response.SetStatus(false), response.SetMessage(err))
 		}
-
 		rc <- response.Api(response.SetCode(200), response.SetData(r))
 	}()
 

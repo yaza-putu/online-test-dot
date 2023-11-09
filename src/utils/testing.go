@@ -4,65 +4,33 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
 	"github.com/yaza-putu/online-test-dot/src/config"
 	"github.com/yaza-putu/online-test-dot/src/database"
 	"github.com/yaza-putu/online-test-dot/src/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"net/http"
-	"net/http/httptest"
 	"os"
-	"strings"
 )
 
-func NewServerTest(method string, target string, params string) (echo.Context, *httptest.ResponseRecorder) {
-	// setup env
-	envTesting()
-
-	// call database
-	databaseTesting()
-
-	e := echo.New()
-	req := &http.Request{}
-	rec := httptest.NewRecorder()
-
-	switch method {
-	case "POST":
-		req = httptest.NewRequest(http.MethodPost, target, strings.NewReader(params))
-		break
-	case "PUT":
-		req = httptest.NewRequest(http.MethodPut, target, strings.NewReader(params))
-		break
-	case "PATCH":
-		req = httptest.NewRequest(http.MethodPatch, target, strings.NewReader(params))
-		break
-	case "DELETE":
-		req = httptest.NewRequest(http.MethodPatch, target, strings.NewReader(params))
-		break
-	default:
-		req = httptest.NewRequest(http.MethodGet, target, strings.NewReader(params))
-		break
-	}
-
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	return e.NewContext(req, rec), rec
-}
-
-func envTesting() {
+func EnvTesting(path string) error {
 	workingdir, _ := os.Getwd()
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
-	viper.AddConfigPath(workingdir + "/../../../../")
+	viper.AddConfigPath(workingdir + path)
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
+
+	viper.Set("app_debug", false)
+	viper.Set("app_status", "test")
+
+	return err
 }
 
-func databaseTesting() {
+func DatabaseTesting() error {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", config.DB().User, config.DB().Password, config.DB().Host, config.DB().Port, config.DB().Name)
 
 	sqlDB, err := sql.Open("mysql", dsn)
@@ -82,4 +50,5 @@ func databaseTesting() {
 	}
 
 	database.Instance = db
+	return err
 }

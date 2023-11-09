@@ -100,6 +100,30 @@ func (c *goodsHandler) Update(ctx echo.Context) error {
 	return ctx.JSON(r.Code, r)
 }
 
+func (c *goodsHandler) Stock(ctx echo.Context) error {
+	// filter and validation
+	id := ctx.Param("id")
+	req := validation.GoodsStock{}
+
+	err := ctx.Bind(&req)
+	if err != nil {
+		logger.New(err, logger.SetType(logger.ERROR))
+		return ctx.JSON(http.StatusBadRequest, response.Api(response.SetCode(400), response.SetMessage(err)))
+	}
+
+	res, err := request.Validation(&req)
+	if err != nil {
+		return ctx.JSON(http.StatusUnprocessableEntity, res)
+	}
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+
+	r := c.service.Stock(ctxTimeout, id, req.Stock)
+
+	return ctx.JSON(r.Code, r)
+}
+
 func (c *goodsHandler) Delete(ctx echo.Context) error {
 	// filter and validation
 	id := ctx.Param("id")

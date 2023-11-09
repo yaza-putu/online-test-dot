@@ -10,7 +10,7 @@ type Goods struct {
 	CategoryId string `gorm:"type:char(36)" json:"category_id"`
 	Category   entity.Category
 	Name       string `gorm:"name" json:"name"`
-	Stock      uint   `gorm:"stock;default:0" json:"stock"`
+	Stock      int    `gorm:"stock;default:0" json:"stock"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

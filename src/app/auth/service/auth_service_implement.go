@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/yaza-putu/online-test-dot/src/app/auth/repository"
 	"github.com/yaza-putu/online-test-dot/src/http/response"
+	"github.com/yaza-putu/online-test-dot/src/logger"
 	"github.com/yaza-putu/online-test-dot/src/utils"
 )
 
@@ -61,6 +62,7 @@ func (a *authService) Refresh(ctx context.Context, oToken string) response.DataA
 	go func() {
 		token, err := a.tokenService.Refresh(ctx, oToken)
 		if err != nil {
+			logger.New(err, logger.SetType(logger.ERROR))
 			rc <- response.Api(response.SetCode(500), response.SetMessage(err))
 		}
 

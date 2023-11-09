@@ -38,6 +38,7 @@ func Api(r *echo.Echo) {
 				goods.POST("", goodsHandler.Create)
 				goods.GET("/:id", goodsHandler.FindById)
 				goods.PUT("/:id", goodsHandler.Update)
+				goods.PATCH("/:id", goodsHandler.Stock)
 				goods.DELETE("/:id", goodsHandler.Delete)
 			}
 		}
