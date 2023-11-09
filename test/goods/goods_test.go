@@ -223,3 +223,27 @@ func (s *e2eTestSuite) TestNotFoundData() {
 	s.Equal(http.StatusNotFound, response.StatusCode)
 	response.Body.Close()
 }
+
+func (s *e2eTestSuite) TestUpdateStock() {
+	id, _ := s.create("GD 1")
+
+	reqStr := `{"stock" : 4}`
+	req, err := http.NewRequest(echo.PUT, fmt.Sprintf("http://localhost:%d/api/goods/%s", config.Host().Port, id), strings.NewReader(reqStr))
+	s.NoError(err)
+
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", s.Token))
+
+	client := http.Client{}
+
+	response, err := client.Do(req)
+	byteBody, err := ioutil.ReadAll(response.Body)
+	s.NoError(err)
+
+	s.Equal(http.StatusOK, response.StatusCode)
+	assert.Contains(s.T(), strings.Trim(string(byteBody), "\n"), `"stock": 4`)
+	// rollback data
+	s.rollback("GD 1")
+	s.rollbackCategory("CAT 1")
+	response.Body.Close()
+}
