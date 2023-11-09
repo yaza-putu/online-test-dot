@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fmt"
+	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/yaza-putu/online-test-dot/src/app/auth/repository"
 	"github.com/yaza-putu/online-test-dot/src/app/auth/service"
@@ -10,6 +10,7 @@ import (
 	"github.com/yaza-putu/online-test-dot/src/http/response"
 	"github.com/yaza-putu/online-test-dot/src/logger"
 	"net/http"
+	"time"
 )
 
 type authHandler struct {
@@ -28,7 +29,7 @@ func (a *authHandler) Create(ctx echo.Context) error {
 	b := ctx.Bind(&req)
 	if b != nil {
 		return ctx.JSON(http.StatusBadRequest, response.Api(
-			response.SetCode(400), response.SetMessage(fmt.Sprint("Bad request : %s", b.Error())),
+			response.SetCode(400), response.SetMessage(b.Error()),
 		))
 	}
 
@@ -40,7 +41,9 @@ func (a *authHandler) Create(ctx echo.Context) error {
 		return ctx.JSON(http.StatusUnprocessableEntity, res)
 	}
 
-	r := a.authService.Login(ctx.Request().Context(), req.Email, req.Password)
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+	r := a.authService.Login(ctxTimeout, req.Email, req.Password)
 
 	return ctx.JSON(r.Code, r)
 }
@@ -48,10 +51,11 @@ func (a *authHandler) Create(ctx echo.Context) error {
 func (a *authHandler) Refresh(ctx echo.Context) error {
 	// request
 	req := validation.RefreshTokenValidation{}
+
 	b := ctx.Bind(&req)
 	if b != nil {
 		return ctx.JSON(http.StatusBadRequest, response.Api(
-			response.SetCode(400), response.SetMessage(fmt.Sprint("Bad request : %s", b.Error())),
+			response.SetCode(400), response.SetMessage(b.Error()),
 		))
 	}
 
@@ -63,7 +67,9 @@ func (a *authHandler) Refresh(ctx echo.Context) error {
 		return ctx.JSON(http.StatusUnprocessableEntity, res)
 	}
 
-	r := a.authService.Refresh(ctx.Request().Context(), req.Token)
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+	r := a.authService.Refresh(ctxTimeout, req.Token)
 
 	return ctx.JSON(r.Code, r)
 }

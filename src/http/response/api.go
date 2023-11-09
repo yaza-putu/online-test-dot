@@ -87,3 +87,7 @@ func Api(opts ...optFunc) DataApi {
 		res: o,
 	}
 }
+
+func TimeOut() DataApi {
+	return Api(SetCode(408), SetMessage("Request timeout or canceled by user"))
+}

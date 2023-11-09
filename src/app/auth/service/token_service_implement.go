@@ -53,7 +53,7 @@ func (t *tokenService) Create(ctx context.Context, user entity.User) (string, st
 			Name:  user.Name,
 			Email: user.Email,
 			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
+				ExpiresAt: time.Now().Add(time.Minute * 10).Unix(),
 			},
 		})
 		if err != nil {
@@ -123,7 +123,7 @@ func (t *tokenService) Refresh(ctx context.Context, rToken string) (string, erro
 			Name:  dataClaim["name"].(string),
 			Email: dataClaim["email"].(string),
 			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
+				ExpiresAt: time.Now().Add(time.Minute * 10).Unix(),
 			},
 		}
 
