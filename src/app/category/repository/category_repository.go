@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/yaza-putu/online-test-dot/src/app/category/entity"
 	"github.com/yaza-putu/online-test-dot/src/database"
+	redis_client "github.com/yaza-putu/online-test-dot/src/redis"
 	"github.com/yaza-putu/online-test-dot/src/utils"
 	"strings"
 )
@@ -24,23 +25,31 @@ func (c *categoryRepository) Create(ctx context.Context, cat entity.Category) (e
 	cat.ID = utils.Uid(13)
 	cat.Name = strings.ToTitle(cat.Name)
 	r := database.Instance.WithContext(ctx).Create(&cat)
-
+	redis_client.Set(ctx, cat.ID, cat)
+	redis_client.Del(ctx, "categories")
 	return cat, r.Error
 }
 
 func (c *categoryRepository) Update(ctx context.Context, id string, cat entity.Category) error {
 	cat.Name = strings.ToTitle(cat.Name)
+
+	d := cat
+	d.ID = id
+	redis_client.Set(ctx, id, d)
+	redis_client.Del(ctx, "categories")
 	return database.Instance.WithContext(ctx).Where("id = ?", id).Updates(&cat).Error
 }
 
 func (c *categoryRepository) Delete(ctx context.Context, id string) error {
+	redis_client.Del(context.Background(), id)
+	redis_client.Del(ctx, "categories")
 	return database.Instance.WithContext(ctx).Where("id = ?", id).Delete(&c.entity).Error
 }
 
 func (c *categoryRepository) FindById(ctx context.Context, id string) (entity.Category, error) {
 	e := c.entity
 	r := database.Instance.WithContext(ctx).Where("id = ?", id).First(&e)
-
+	redis_client.FindSet(ctx, id, e)
 	return e, r.Error
 }
 
@@ -56,6 +65,8 @@ func (c *categoryRepository) All(ctx context.Context, page int, take int) (utils
 
 	pagination.Rows = e
 	pagination.CalculatePage(float64(totalRow))
+
+	redis_client.FindSet(ctx, "categories", pagination)
 
 	return pagination, r.Error
 }

@@ -3,11 +3,13 @@ package handler
 import (
 	"context"
 	"github.com/labstack/echo/v4"
+	"github.com/yaza-putu/online-test-dot/src/app/category/entity"
 	"github.com/yaza-putu/online-test-dot/src/app/category/service"
 	"github.com/yaza-putu/online-test-dot/src/app/category/validation"
 	"github.com/yaza-putu/online-test-dot/src/http/request"
 	"github.com/yaza-putu/online-test-dot/src/http/response"
 	"github.com/yaza-putu/online-test-dot/src/logger"
+	redis_client "github.com/yaza-putu/online-test-dot/src/redis"
 	"github.com/yaza-putu/online-test-dot/src/utils"
 	"net/http"
 	"time"
@@ -50,8 +52,14 @@ func (c *categoryHandler) All(ctx echo.Context) error {
 
 	timeOutCtx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
-	r := c.service.All(timeOutCtx, req.Page, req.Take)
-	return ctx.JSON(http.StatusOK, r)
+	dst := utils.Pagination{}
+	er := redis_client.Get(timeOutCtx, "categories", &dst)
+	if er != nil {
+		r := c.service.All(timeOutCtx, req.Page, req.Take)
+		return ctx.JSON(http.StatusOK, r)
+	} else {
+		return ctx.JSON(http.StatusOK, response.Api(response.SetCode(200), response.SetData(dst)))
+	}
 }
 
 func (c *categoryHandler) Create(ctx echo.Context) error {
@@ -118,7 +126,14 @@ func (c *categoryHandler) FindById(ctx echo.Context) error {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 
-	r := c.service.FindById(ctxTimeout, id)
+	dst := entity.Category{}
+	err := redis_client.Get(ctxTimeout, id, &dst)
+	if err != nil {
+		r := c.service.FindById(ctxTimeout, id)
 
-	return ctx.JSON(r.Code, r)
+		return ctx.JSON(r.Code, r)
+	} else {
+		return ctx.JSON(http.StatusOK, response.Api(response.SetCode(200), response.SetData(dst)))
+	}
+
 }
