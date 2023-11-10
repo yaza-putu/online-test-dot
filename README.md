@@ -2,7 +2,7 @@
 ![golang](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Go_Logo_Blue.svg/1200px-Go_Logo_Blue.svg.png)
 
 ## Docs API
-![postman](https://www.postman.com/solar-station-579869/workspace/public-yasa/collection/10651918-6fcf2b2e-8270-4efe-8cb6-f6c943f118b0?action=share&creator=10651918)
+[postman](https://www.postman.com/solar-station-579869/workspace/public-yasa/collection/10651918-6fcf2b2e-8270-4efe-8cb6-f6c943f118b0?action=share&creator=10651918)
 
 ## How to start
 
