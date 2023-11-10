@@ -25,7 +25,7 @@ func TestE2ETestSuite(t *testing.T) {
 }
 
 func (s *e2eTestSuite) SetupSuite() {
-	s.Require().NoError(utils.EnvTesting("/../.."))
+	s.Require().NoError(utils.EnvTesting())
 	s.Require().NoError(utils.DatabaseTesting())
 
 	go core.HttpServerTesting()

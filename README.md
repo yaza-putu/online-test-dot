@@ -15,6 +15,15 @@
   ```bash
   make key
   ```
+- run migration
+```bash
+go run zoro.go migration:up
+```
+
+- run seeder
+```bash
+go run zoro.go seed:up
+```
 - run dev mode
   ```bash
     make run
@@ -22,10 +31,6 @@
 - build
   ```bash
   make build
-  ```
-- test
-  ```bash
-    make test
   ```
 
 ## Zoro command
@@ -71,3 +76,8 @@ ID   string `validate:"required"`
 - [Env](https://github.com/spf13/viper)
 
 # Alasan memakai service & repository pattern
+Saya biasanya memakai pattern service dan repository bertujuan memisahkan business logic dengan query logic serta memfungsikan handler untuk fokus pada pengarahan lalulintas data
+kalau tidak memakai pattern cendrung kita menulis logika programing pada satu file katakan handler kalau project kecil tidak masalah tetapi jika project besar ini akan sulit di maintenace karena kode program yang banyak dan bercampur
+
+selain pattern di project ini saya menambahkan otomatisasi pembuatan migration dan seeder untuk memudahkan development
+

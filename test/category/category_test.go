@@ -28,7 +28,7 @@ func TestE2ETestSuite(t *testing.T) {
 }
 
 func (s *e2eTestSuite) SetupSuite() {
-	s.Require().NoError(utils.EnvTesting("/../.."))
+	s.Require().NoError(utils.EnvTesting())
 	s.Require().NoError(utils.DatabaseTesting())
 	core.Redis()
 	go core.HttpServerTesting()
@@ -212,8 +212,6 @@ func (s *e2eTestSuite) TestNotFoundData() {
 
 	response, err := client.Do(req)
 	s.NoError(err)
-	//byteBody, err := ioutil.ReadAll(response.Body)
-	//fmt.Println(strings.Trim(string(byteBody), "\n"))
 
 	s.Equal(http.StatusNotFound, response.StatusCode)
 	response.Body.Close()
