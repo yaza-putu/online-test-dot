@@ -52,7 +52,7 @@ func Token(s *e2eTestSuite) {
 	s.NoError(err)
 	token := bodyToken.Data.(map[string]any)
 	s.Token = token["access_token"].(string)
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestValidationForm() {
@@ -69,7 +69,7 @@ func (s *e2eTestSuite) TestValidationForm() {
 	s.NoError(err)
 
 	s.Equal(http.StatusUnprocessableEntity, response.StatusCode)
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestTokenEmpty() {
@@ -87,7 +87,7 @@ func (s *e2eTestSuite) TestTokenEmpty() {
 
 	s.Equal(http.StatusBadRequest, response.StatusCode)
 
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestWrongToken() {
@@ -106,7 +106,7 @@ func (s *e2eTestSuite) TestWrongToken() {
 
 	s.Equal(http.StatusUnauthorized, response.StatusCode)
 
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestSuccessCreate() {
@@ -125,7 +125,7 @@ func (s *e2eTestSuite) TestSuccessCreate() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
 	s.rollback("GD 1", "CAT X")
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) create(name string) (string, string) {
@@ -146,7 +146,7 @@ func (s *e2eTestSuite) create(name string) (string, string) {
 
 	s.NoError(err)
 
-	response.Body.Close()
+	defer response.Body.Close()
 
 	return data["id"].(string), data["category_id"].(string)
 }
@@ -173,7 +173,7 @@ func (s *e2eTestSuite) TestSuccessUpdate() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
 	s.rollback("GD 2", "CAT X")
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestSuccessFindById() {
@@ -194,7 +194,7 @@ func (s *e2eTestSuite) TestSuccessFindById() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
 	s.rollback("GD 1", "CAT X")
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestNotFoundData() {
@@ -212,7 +212,7 @@ func (s *e2eTestSuite) TestNotFoundData() {
 	s.NoError(err)
 
 	s.Equal(http.StatusNotFound, response.StatusCode)
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestUpdateStock() {
@@ -233,5 +233,5 @@ func (s *e2eTestSuite) TestUpdateStock() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
 	s.rollback("GD 1", "CAT X")
-	response.Body.Close()
+	defer response.Body.Close()
 }

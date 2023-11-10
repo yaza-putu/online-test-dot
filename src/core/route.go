@@ -31,5 +31,5 @@ func HttpServerTesting() {
 	routes.Api(e)
 	e.HideBanner = true
 	e.Logger.(*log.Logger).SetOutput(ioutil.Discard)
-	e.Start(fmt.Sprintf("%s%d", ":", config.Host().Port))
+	e.Logger.Fatal(e.Start(fmt.Sprintf("%s%d", ":", config.Host().Port)))
 }

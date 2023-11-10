@@ -36,6 +36,13 @@ go run zoro.go seed:up
   make build
   ```
   
+- run test
+```bash
+make gotest
+# or
+go test ./test/...
+```
+  
 
 # Default Login
 email : user@mail.com
