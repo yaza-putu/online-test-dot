@@ -8,13 +8,13 @@
 
 - install depedency
   ```bash
-    make tidy
+  make tidy
   # or
   go mod tidy
   ```
 - copy environment
   ```bash
-    make config
+  make config
   #or
   cp .env.example .env
   ```
