@@ -9,39 +9,49 @@
 - install depedency
   ```bash
     make tidy
+  # or
+  go mod tidy
   ```
 - copy environment
   ```bash
     make config
+  #or
+  cp .env.example .env
   ```
 - generate key
   ```bash
-  make key
+    make key
+    # or
+    go run zoro.go key:generate
   ```
 - run migration
-```bash
-go run zoro.go migrate:up
-```
+  ```bash
+   go run zoro.go migrate:up
+  ```
 
 - run seeder
-```bash
-go run zoro.go seed:up
-```
+  ```bash
+   go run zoro.go seed:up
+  ```
 - run dev mode
   ```bash
     make run
+    # or
+    go run main.go
   ```
 - build
   ```bash
   make build
+  # or
+  go build main.go
   ```
   
 - run test
-```bash
-make gotest
-# or
-go test ./test/...
-```
+  ```bash
+   make gotest
+   # or
+   go test ./test/...
+  ```
   
 
 # Default Login
