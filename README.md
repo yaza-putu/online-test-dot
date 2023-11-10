@@ -17,7 +17,7 @@
   ```
 - run migration
 ```bash
-go run zoro.go migration:up
+go run zoro.go migrate:up
 ```
 
 - run seeder
@@ -46,7 +46,16 @@ go run zoro.go seed:up
   ```bash
     go run zoro.go migrate:down
   ```
+
+# Alasan memakai service & repository pattern
+Saya biasanya memakai pattern service dan repository bertujuan memisahkan business logic dengan query logic serta memfungsikan handler untuk fokus pada pengarahan lalulintas data
+kalau tidak memakai pattern cendrung kita menulis logika programing pada satu file katakan handler kalau project kecil tidak masalah tetapi jika project besar ini akan sulit di maintenace karena kode program yang banyak dan bercampur
+
+selain pattern di project ini saya menambahkan otomatisasi pembuatan migration dan seeder untuk memudahkan development
+
+
   
+
 ## Validation Unique With Struct Tag
 - unique
 ```go
@@ -74,10 +83,4 @@ ID   string `validate:"required"`
 - [Echo](https://echo.labstack.com)
 - [Gorm](https://gorm.io)
 - [Env](https://github.com/spf13/viper)
-
-# Alasan memakai service & repository pattern
-Saya biasanya memakai pattern service dan repository bertujuan memisahkan business logic dengan query logic serta memfungsikan handler untuk fokus pada pengarahan lalulintas data
-kalau tidak memakai pattern cendrung kita menulis logika programing pada satu file katakan handler kalau project kecil tidak masalah tetapi jika project besar ini akan sulit di maintenace karena kode program yang banyak dan bercampur
-
-selain pattern di project ini saya menambahkan otomatisasi pembuatan migration dan seeder untuk memudahkan development
 

@@ -29,7 +29,7 @@ func main() {
 		m := []string{
 			"- key:generate",
 			"- make:migration",
-			"- migration:up",
+			"- migrate:up",
 			"- migration:down",
 			"- make:seeder",
 			"- seed:up",
