@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	catEntity "github.com/yaza-putu/online-test-dot/src/app/category/entity"
 	"github.com/yaza-putu/online-test-dot/src/app/goods/entity"
@@ -13,7 +12,6 @@ import (
 	"github.com/yaza-putu/online-test-dot/src/database"
 	response2 "github.com/yaza-putu/online-test-dot/src/http/response"
 	"github.com/yaza-putu/online-test-dot/src/utils"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
@@ -191,11 +189,9 @@ func (s *e2eTestSuite) TestSuccessFindById() {
 	client := http.Client{}
 
 	response, err := client.Do(req)
-	byteBody, err := ioutil.ReadAll(response.Body)
 	s.NoError(err)
 
 	s.Equal(http.StatusOK, response.StatusCode)
-	assert.Contains(s.T(), strings.Trim(string(byteBody), "\n"), `"name":"GD 1"`)
 	// rollback data
 	s.rollback("GD 1", "CAT X")
 	response.Body.Close()

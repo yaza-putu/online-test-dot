@@ -32,6 +32,12 @@ go run zoro.go seed:up
   ```bash
   make build
   ```
+  
+
+# Default Login
+email : user@mail.com
+
+pass : Password1
 
 ## Zoro command
 - make migration
