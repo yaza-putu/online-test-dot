@@ -48,7 +48,7 @@ func (s *e2eTestSuite) TestCreateToken() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	assert.Contains(s.T(), strings.Trim(string(byteBody), "\n"), "access_token")
 
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestWrongCredintial() {
@@ -66,7 +66,7 @@ func (s *e2eTestSuite) TestWrongCredintial() {
 
 	s.Equal(http.StatusUnauthorized, response.StatusCode)
 
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestValidationPassword() {
@@ -84,7 +84,7 @@ func (s *e2eTestSuite) TestValidationPassword() {
 
 	s.Equal(http.StatusUnprocessableEntity, response.StatusCode)
 
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestValidationEmail() {
@@ -102,7 +102,7 @@ func (s *e2eTestSuite) TestValidationEmail() {
 
 	s.Equal(http.StatusUnprocessableEntity, response.StatusCode)
 
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestRenewalToken() {

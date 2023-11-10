@@ -11,3 +11,6 @@ tidy:
 	go mod tidy
 key:
 	go run zoro.go key:generate
+
+gotest:
+	go test ./test/...

@@ -51,7 +51,7 @@ func Token(s *e2eTestSuite) {
 	s.NoError(err)
 	token := bodyToken.Data.(map[string]any)
 	s.Token = token["access_token"].(string)
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestValidationForm() {
@@ -68,7 +68,7 @@ func (s *e2eTestSuite) TestValidationForm() {
 	s.NoError(err)
 
 	s.Equal(http.StatusUnprocessableEntity, response.StatusCode)
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestTokenEmpty() {
@@ -86,7 +86,7 @@ func (s *e2eTestSuite) TestTokenEmpty() {
 
 	s.Equal(http.StatusBadRequest, response.StatusCode)
 
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestWrongToken() {
@@ -105,7 +105,7 @@ func (s *e2eTestSuite) TestWrongToken() {
 
 	s.Equal(http.StatusUnauthorized, response.StatusCode)
 
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestSuccessCreate() {
@@ -123,7 +123,7 @@ func (s *e2eTestSuite) TestSuccessCreate() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
 	s.rollback("CAT 1")
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) create(name string) string {
@@ -143,7 +143,7 @@ func (s *e2eTestSuite) create(name string) string {
 	data := bodyToken.Data.(map[string]any)
 	s.NoError(err)
 
-	response.Body.Close()
+	defer response.Body.Close()
 
 	return data["id"].(string)
 }
@@ -170,7 +170,7 @@ func (s *e2eTestSuite) TestSuccessUpdate() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
 	s.rollback("CAT 3")
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestSuccessFindById() {
@@ -191,7 +191,7 @@ func (s *e2eTestSuite) TestSuccessFindById() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
 	s.rollback("CAT 1")
-	response.Body.Close()
+	defer response.Body.Close()
 }
 
 func (s *e2eTestSuite) TestNotFoundData() {
@@ -209,5 +209,5 @@ func (s *e2eTestSuite) TestNotFoundData() {
 	s.NoError(err)
 
 	s.Equal(http.StatusNotFound, response.StatusCode)
-	response.Body.Close()
+	defer response.Body.Close()
 }
