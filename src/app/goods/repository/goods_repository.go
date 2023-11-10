@@ -8,6 +8,7 @@ import (
 	"github.com/yaza-putu/online-test-dot/src/logger"
 	redis_client "github.com/yaza-putu/online-test-dot/src/redis"
 	"github.com/yaza-putu/online-test-dot/src/utils"
+	"gorm.io/gorm"
 	"strings"
 )
 
@@ -27,42 +28,42 @@ func NewGoods() GoodsInterface {
 func (c *goodsRepository) Create(ctx context.Context, gds entity.Goods) (entity.Goods, error) {
 	db := database.Instance
 	// start transaction
-	db.Begin()
+	return gds, db.Transaction(func(tx *gorm.DB) error {
 
-	gds.ID = utils.Uid(13)
-	gds.Name = strings.ToTitle(gds.Name)
+		gds.ID = utils.Uid(13)
+		gds.Name = strings.ToTitle(gds.Name)
 
-	cat := catEntity.Category{}
+		cat := catEntity.Category{}
+		cf := db.Where("id = ?", gds.CategoryId).First(&cat)
 
-	cf := db.Where("id = ?", gds.CategoryId).First(&cat)
-	logger.New(cf.Error, logger.SetType(logger.ERROR))
+		logger.New(cf.Error, logger.SetType(logger.ERROR))
 
-	// check if category not exist and let's create
-	if cat.ID == "" {
-		catId := utils.Uid(13)
-		catR := catEntity.Category{Name: strings.ToTitle(gds.CategoryId), ID: catId}
-		cr := db.Create(&catR)
-		if cr.Error != nil {
-			db.Rollback()
+		// check if category not exist and let's create
+		if cat.ID == "" {
+			catId := utils.Uid(13)
+			catR := catEntity.Category{Name: strings.ToTitle(gds.CategoryId), ID: catId}
+			cr := db.Create(&catR)
+			if cr.Error != nil {
+				logger.New(cf.Error, logger.SetType(logger.ERROR))
+				return cr.Error
+			}
+			gds.CategoryId = catId
+			gds.Category = catR
 		}
-		gds.CategoryId = catId
-		gds.Category = catR
-	}
 
-	r := db.WithContext(ctx).Create(&gds)
+		r := db.WithContext(ctx).Create(&gds)
 
-	// rollback if error
-	if r.Error != nil {
-		db.Rollback()
-		redis_client.Del(ctx, gds.ID)
-	}
+		// rollback if error
+		if r.Error != nil {
+			redis_client.Del(ctx, gds.ID)
+			return r.Error
+		}
 
-	redis_client.Set(ctx, gds.ID, gds)
-	redis_client.Del(ctx, "goods")
-	// if no error
-	db.Commit()
+		redis_client.Set(ctx, gds.ID, gds)
+		redis_client.Del(ctx, "goods")
 
-	return gds, r.Error
+		return nil
+	})
 }
 
 func (c *goodsRepository) Update(ctx context.Context, id string, gds entity.Goods) error {
@@ -84,8 +85,9 @@ func (c *goodsRepository) Delete(ctx context.Context, id string) error {
 func (c *goodsRepository) FindById(ctx context.Context, id string) (entity.Goods, error) {
 	e := c.entity
 	r := database.Instance.WithContext(ctx).Preload("Category").Where("id = ?", id).First(&e)
-
-	redis_client.FindSet(ctx, id, e)
+	if r.Error == nil {
+		redis_client.FindSet(ctx, id, e)
+	}
 	return e, r.Error
 }
 
@@ -113,6 +115,9 @@ func (c *goodsRepository) All(ctx context.Context, page int, take int) (utils.Pa
 
 	pagination.Rows = e
 	pagination.CalculatePage(float64(totalRow))
-	redis_client.FindSet(ctx, "goods", pagination)
+
+	if totalRow > 0 {
+		redis_client.FindSet(ctx, "goods", pagination)
+	}
 	return pagination, r.Error
 }

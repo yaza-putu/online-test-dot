@@ -30,7 +30,7 @@ func TestE2ETestSuite(t *testing.T) {
 func (s *e2eTestSuite) SetupSuite() {
 	s.Require().NoError(utils.EnvTesting("/../.."))
 	s.Require().NoError(utils.DatabaseTesting())
-
+	core.Redis()
 	go core.HttpServerTesting()
 	Token(s)
 }
@@ -114,16 +114,15 @@ func (s *e2eTestSuite) TestSuccessCreate() {
 	reqStr := `{"name":"Cat 1"}`
 	req, err := http.NewRequest(echo.POST, fmt.Sprintf("http://localhost:%d/api/categories", config.Host().Port), strings.NewReader(reqStr))
 	s.NoError(err)
-
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", s.Token))
 
 	client := http.Client{}
 
 	response, err := client.Do(req)
+
 	byteBody, err := ioutil.ReadAll(response.Body)
 	s.NoError(err)
-
 	s.Equal(http.StatusOK, response.StatusCode)
 	assert.Contains(s.T(), strings.Trim(string(byteBody), "\n"), `"name":"CAT 1"`)
 	// rollback data
@@ -193,7 +192,6 @@ func (s *e2eTestSuite) TestSuccessFindById() {
 	response, err := client.Do(req)
 	byteBody, err := ioutil.ReadAll(response.Body)
 	s.NoError(err)
-
 	s.Equal(http.StatusOK, response.StatusCode)
 	assert.Contains(s.T(), strings.Trim(string(byteBody), "\n"), `"name":"CAT 1"`)
 	// rollback data
@@ -214,6 +212,8 @@ func (s *e2eTestSuite) TestNotFoundData() {
 
 	response, err := client.Do(req)
 	s.NoError(err)
+	//byteBody, err := ioutil.ReadAll(response.Body)
+	//fmt.Println(strings.Trim(string(byteBody), "\n"))
 
 	s.Equal(http.StatusNotFound, response.StatusCode)
 	response.Body.Close()

@@ -5,7 +5,7 @@ run:
 	go run main.go
 
 test:
-	go test -race ./...
+	cd test && go test -race ./... && cd..
 
 config:
 	cp .env.example .env

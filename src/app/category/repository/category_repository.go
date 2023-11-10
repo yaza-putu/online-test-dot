@@ -49,7 +49,9 @@ func (c *categoryRepository) Delete(ctx context.Context, id string) error {
 func (c *categoryRepository) FindById(ctx context.Context, id string) (entity.Category, error) {
 	e := c.entity
 	r := database.Instance.WithContext(ctx).Where("id = ?", id).First(&e)
-	redis_client.FindSet(ctx, id, e)
+	if r.Error == nil {
+		redis_client.FindSet(ctx, id, e)
+	}
 	return e, r.Error
 }
 
@@ -66,7 +68,9 @@ func (c *categoryRepository) All(ctx context.Context, page int, take int) (utils
 	pagination.Rows = e
 	pagination.CalculatePage(float64(totalRow))
 
-	redis_client.FindSet(ctx, "categories", pagination)
+	if totalRow > 0 {
+		redis_client.FindSet(ctx, "categories", pagination)
+	}
 
 	return pagination, r.Error
 }

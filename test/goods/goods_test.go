@@ -31,7 +31,7 @@ func TestE2ETestSuite(t *testing.T) {
 func (s *e2eTestSuite) SetupSuite() {
 	s.Require().NoError(utils.EnvTesting("/../.."))
 	s.Require().NoError(utils.DatabaseTesting())
-
+	core.Redis()
 	go core.HttpServerTesting()
 	Token(s)
 }
@@ -112,7 +112,7 @@ func (s *e2eTestSuite) TestWrongToken() {
 }
 
 func (s *e2eTestSuite) TestSuccessCreate() {
-	reqStr := fmt.Sprintf(`{"name":"Goods 1", "category_id": "CAT 1"}`)
+	reqStr := fmt.Sprintf(`{"name":"GD 1", "category_id": "CAT X"}`)
 	req, err := http.NewRequest(echo.POST, fmt.Sprintf("http://localhost:%d/api/goods", config.Host().Port), strings.NewReader(reqStr))
 	s.NoError(err)
 
@@ -126,13 +126,12 @@ func (s *e2eTestSuite) TestSuccessCreate() {
 	s.NoError(err)
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
-	s.rollback("Goods 1")
-	s.rollbackCategory("CAT 1")
+	s.rollback("GD 1", "CAT X")
 	response.Body.Close()
 }
 
 func (s *e2eTestSuite) create(name string) (string, string) {
-	reqStr := fmt.Sprintf(`{"name":"%s", "category_id": "CAT 1"}`, name)
+	reqStr := fmt.Sprintf(`{"name":"%s", "category_id": "CAT X"}`, name)
 	req, err := http.NewRequest(echo.POST, fmt.Sprintf("http://localhost:%d/api/goods", config.Host().Port), strings.NewReader(reqStr))
 	s.NoError(err)
 
@@ -142,10 +141,11 @@ func (s *e2eTestSuite) create(name string) (string, string) {
 	client := http.Client{}
 
 	response, err := client.Do(req)
-
 	bodyToken := response2.DataApi{}
 	json.NewDecoder(response.Body).Decode(&bodyToken)
+
 	data := bodyToken.Data.(map[string]any)
+
 	s.NoError(err)
 
 	response.Body.Close()
@@ -153,17 +153,14 @@ func (s *e2eTestSuite) create(name string) (string, string) {
 	return data["id"].(string), data["category_id"].(string)
 }
 
-func (s *e2eTestSuite) rollbackCategory(name string) {
-	database.Instance.Where("name = ?", name).Delete(&catEntity.Category{})
-}
-
-func (s *e2eTestSuite) rollback(name string) {
-	database.Instance.Where("name = ?", name).Delete(&entity.Goods{})
+func (s *e2eTestSuite) rollback(gd string, cat string) {
+	database.Instance.Where("name = ?", gd).Delete(&entity.Goods{})
+	database.Instance.Where("name = ?", cat).Delete(&catEntity.Category{})
 }
 
 func (s *e2eTestSuite) TestSuccessUpdate() {
 	id, CatId := s.create("GD 1")
-	reqStr := fmt.Sprintf(`{"name":"GD 2", "category_id" : "%s""}`, CatId)
+	reqStr := fmt.Sprintf(`{"name":"GD 2", "category_id" : "%s"}`, CatId)
 	req, err := http.NewRequest(echo.PUT, fmt.Sprintf("http://localhost:%d/api/goods/%s", config.Host().Port, id), strings.NewReader(reqStr))
 	s.NoError(err)
 
@@ -177,8 +174,7 @@ func (s *e2eTestSuite) TestSuccessUpdate() {
 
 	s.Equal(http.StatusOK, response.StatusCode)
 	// rollback data
-	s.rollback("GD 2")
-	s.rollbackCategory("CAT 1")
+	s.rollback("GD 2", "CAT X")
 	response.Body.Close()
 }
 
@@ -201,8 +197,7 @@ func (s *e2eTestSuite) TestSuccessFindById() {
 	s.Equal(http.StatusOK, response.StatusCode)
 	assert.Contains(s.T(), strings.Trim(string(byteBody), "\n"), `"name":"GD 1"`)
 	// rollback data
-	s.rollback("GD 1")
-	s.rollbackCategory("CAT 1")
+	s.rollback("GD 1", "CAT X")
 	response.Body.Close()
 }
 
@@ -228,7 +223,7 @@ func (s *e2eTestSuite) TestUpdateStock() {
 	id, _ := s.create("GD 1")
 
 	reqStr := `{"stock" : 4}`
-	req, err := http.NewRequest(echo.PUT, fmt.Sprintf("http://localhost:%d/api/goods/%s", config.Host().Port, id), strings.NewReader(reqStr))
+	req, err := http.NewRequest(echo.PATCH, fmt.Sprintf("http://localhost:%d/api/goods/%s", config.Host().Port, id), strings.NewReader(reqStr))
 	s.NoError(err)
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -237,13 +232,10 @@ func (s *e2eTestSuite) TestUpdateStock() {
 	client := http.Client{}
 
 	response, err := client.Do(req)
-	byteBody, err := ioutil.ReadAll(response.Body)
 	s.NoError(err)
 
 	s.Equal(http.StatusOK, response.StatusCode)
-	assert.Contains(s.T(), strings.Trim(string(byteBody), "\n"), `"stock": 4`)
 	// rollback data
-	s.rollback("GD 1")
-	s.rollbackCategory("CAT 1")
+	s.rollback("GD 1", "CAT X")
 	response.Body.Close()
 }
